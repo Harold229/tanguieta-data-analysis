@@ -1,0 +1,431 @@
+---
+title: "tanguieta_2"
+format: html
+editor: visual
+---
+
+Tanguieta base de données
+
+```{r}
+library(pacman)
+p_load(
+  tidyverse,
+  readxl,
+  broom,
+  dplyr,
+  ggimage,
+  ggplot2,
+  glue,
+  here,
+  readr,
+  sf,
+  tidyr,
+  tmap,
+  assertive,
+  gtsummary,
+  questionr,
+  mstate,
+  GGally,
+  gt,
+  flextable
+)
+
+```
+
+```{r}
+tang<- read_excel("tanguieta.xlsx")
+view(tang)
+
+```
+
+```{r}
+#| echo: false
+
+colnames(tang)
+
+tang_v1<-tang %>% dplyr::select(Age , siegmos1, dadm, durehosp,readministration, sexe ,classage ,SAVavt, oedemh0, oedemH2, oedemH4, oedemH6, oedemH4, oedemH6, oedemH12, oedemH24, oedemH48, oedemsrt, SAVH0, SAVH2, SAVH4, SAVH6, SAVH12, SAVH24, SAVH48, SAVaH48, TCTCSh0, TCTSH2, TCTSH4, TCTSH6, TCTSH12, TCTSH24, TCTSH48, TCTSaH48, hemorh0, hemorH2, hemorhH4, hemorh6, hemorh12, hemorh24, hemorh48, hemoah48, datehemo, censhemo, daterecovery, recovery, daterelapse, relapse, datedcd, dcd, daterecovery2, recovery2,  comment)
+
+```
+
+Convertir en factor toutes les variables
+
+```{r}
+tang_v1 [c("TCTCSh0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48")]<-lapply(tang_v1 [c("TCTCSh0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48")], function(x) as.factor(x) )
+tang_v
+```
+
+```{r}
+tang_v[-2]
+```
+
+```{r}
+###### recodage des variables TCTS et hemo 
+
+tang_v<-tang_v1 %>% mutate(
+   TCTSH0 = case_when(
+    TCTCSh0 == 0|  TCTCSh0 == "Non" ~ 0,
+    TCTCSh0 == 1 ~ 1,
+    TCTCSh0 == 2 ~ 2 ),
+   
+   TCTSH2 = case_when(
+    TCTSH2== 0|  TCTSH2 == "Non"| is.na(TCTSH2) ~ 0,
+    TCTSH2 == 1 ~ 1,
+    TCTSH2 == 2 ~ 2 ),
+   
+    TCTSH4 = case_when(
+    TCTSH4 == 0|  TCTSH4 == "Non"| is.na(TCTSH4) ~ 0,
+    TCTSH4 == 1 ~ 1,
+    TCTSH4 == 2 ~ 2 ),
+   
+    TCTSH6 = case_when(
+    TCTSH6 == 0|  TCTSH6 == "Non"| is.na(TCTSH6) ~ 0,
+    TCTSH6 == 1 ~ 1,
+    TCTSH6 == 2 ~ 2 ),
+   
+   TCTSH6 = case_when(
+    TCTSH6 == 0|  TCTSH6 == "Non"| is.na(TCTSH6) ~ 0,
+    TCTSH6 == 1 ~ 1,
+    TCTSH6 == 2 ~ 2 ),
+   
+    TCTSH12 = case_when(
+    TCTSH12 == 0|  TCTSH12 == "Non"| is.na(TCTSH12) ~ 0,
+    TCTSH12 == 1 ~ 1,
+    TCTSH12 == 2 ~ 2 ),
+   
+    TCTSH24 = case_when(
+    TCTSH24 == 0|  TCTSH24 == "Non"| is.na(TCTSH24) ~ 0,
+    TCTSH24 == 1 ~ 1,
+    TCTSH24 == 2 ~ 2 ),
+   
+    TCTSH48 = case_when(
+    TCTSH48 == 0|  TCTSH48 == "Non"| is.na(TCTSH48) ~ 0,
+    TCTSH48 == 1 ~ 1,
+    TCTSH48 == 2 ~ 2 ),
+   
+    TCTSaH48 = case_when(
+    TCTSaH48 == 0|  TCTSH48 == "Non"| is.na(TCTSaH48) ~ 0,
+    TCTSaH48 == 1 ~ 1,
+    TCTSaH48 == 2 ~ 2 ),
+   
+   hemorH0 = hemorh0,
+   
+   hemorH2 = case_when(
+     
+     hemorH2 == 0|is.na(hemorH2) ~ 0,
+     
+    TRUE~hemorH2
+   ),
+   
+   
+    hemorH4 = case_when(
+     
+     hemorhH4 = 0|is.na( hemorhH4) ~ 0,
+     
+     TRUE~hemorhH4
+   ),
+     
+     
+   hemorH6 = case_when(
+     
+     hemorh6 = 0|is.na( hemorh6) ~ 0,
+     
+     TRUE~hemorh6
+   ),
+   
+    hemorH12 = case_when(
+     
+     hemorh12 = 0|is.na( hemorh12) ~ 0,
+     
+     TRUE~hemorh12
+   ),
+   
+    hemorH24 = case_when(
+     
+     hemorh24 = 0|is.na( hemorh24) ~ 0,
+     
+     TRUE~hemorh24
+   ),
+   
+    hemorH48 = case_when(
+     
+     hemorh48 = 0|is.na( hemorh48) ~ 0,
+     
+     TRUE~hemorh48
+   ),
+   
+   hemoaH48 = case_when(
+     
+   hemoah48 = 0|is.na(hemoah48) ~ 0,
+     
+   TRUE~hemoah48
+   ),
+   
+   oedemh0 =factor(oedemh0,levels = c(0,1,2,3), labels = c("Non","Stade 1","Stade 2", "Stade 3")), 
+   
+   siegmos1= factor(siegmos1,c("MI","MS"), labels = c("Membres inférieurs","Membres supérieurs")),
+  
+ sexe = as.factor(ifelse(sexe == "F", "Femmes","Hommes")),
+ 
+ datehemo  = replace(datehemo, is.na(datehemo), 72),       
+ 
+ censhemo = replace(censhemo,is.na(censhemo), 0),
+ 
+ daterecovery = replace(daterecovery, is.na(daterecovery), 72),
+ 
+ recovery = replace(recovery,is.na(recovery), 0),
+ 
+ daterelapse = replace(daterelapse,is.na(daterelapse), 72),
+ 
+ relapse = replace(relapse,is.na(relapse), 0),
+ 
+  daterecovery2= replace(daterecovery2, is.na(daterecovery2), 72),
+ 
+ recovery2 = replace(recovery2, is.na(recovery2), 0),
+ 
+   datedcd = replace(datedcd, is.na(datedcd), 72),
+  datedcd = replace(datedcd,datedcd==0, 72),
+ 
+ dcd = replace(dcd, is.na(dcd), 0)
+ 
+   )
+
+
+```
+
+```{r}
+### verification
+
+##tang_v[tang_v$relapse == 0 & tang_v$dcd ==0,]<-
+
+ tang_v[tang_v$hemorH0 != 0 & tang_v$relapse ==0 & tang_v$dcd ==0,]<-tang_v %>% filter(hemorH0 != 0 & relapse ==0 & dcd ==0) %>% mutate(
+   
+  daterecovery2 = replace(daterecovery2, daterecovery2== daterecovery2, daterecovery),
+  
+  daterelapse = replace(daterelapse, daterelapse == daterelapse, daterecovery),
+  
+  datedcd = replace(datedcd, datedcd == datedcd, daterecovery)
+  
+)
+
+ 
+```
+
+```{r}
+tang_v[tang_v$relapse == 1,] <-tang_v %>% filter( relapse == 1 ) %>% mutate(
+  
+  datedcd = replace(datedcd, datedcd == datedcd, daterecovery2)
+  
+)
+
+
+
+
+tang_v[tang_v$dcd == 1,] <- tang_v %>% filter( dcd == 1 ) %>% mutate(
+  
+  daterecovery2 = replace(daterecovery2, daterecovery2== daterecovery2, datedcd),
+  
+  daterelapse = replace(daterelapse, daterelapse == daterelapse, datedcd)
+  
+)
+
+
+
+```
+
+## Description de la populations
+
+```{r}
+
+tang_vrai <- tang_v[tang_v$SAVH0== 1,]
+  
+table<-tang_vrai %>% dplyr::select(Age,sexe,siegmos1,dadm, durehosp, oedemh0, hemorH0,hemorH2,hemorH12,hemorH24,hemorH48,TCTSH0,TCTSH2,TCTSH12,TCTSH24,TCTSH48, readministration ) %>% tbl_summary( 
+  
+  label =list(Age~"Age",sexe~"Sexe",siegmos1~"Siège de morsure", dadm~"Délai d'admission", 
+             durehosp~"Durée d'hospitalisation" , oedemh0~"Oedème", hemorH0~"Hémorragies", TCTSH0~"TCTS",readministration~"Nombres de réadministration")
+  
+  ,
+   statistic = list(
+      all_continuous() ~ "{median} ({p25},{p75})",
+      all_categorical() ~ "{n} / {N} ({p}%)"),
+   type = list(dadm~"continuous"),
+  
+  
+  
+  ) %>%
+  
+modify_header(label = "**Variables**") %>% bold_labels() %>% as_flex_table()
+table
+```
+
+notre
+
+```{r}
+tang_vrai %>% filter(hemorH48 == 3) %>% dplyr::select(TCTSH48)
+```
+
+```{r}
+save_as_docx(table, path = "table.docx")
+```
+
+```{r}
+
+```
+
+## Description des TCTS et Hemorragie
+
+```{r}
+##créer les dataset long de tCTS et de hemo pour les représentations graphiques 
+
+tang_coagulation <-subset(tang_vrai, tang_vrai$hemorH0!= 0)
+tang_coagulation
+
+```
+
+```{r}
+
+tang_tcts<- tang_coagulation [c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48","dcd")]
+
+
+tang_long_tcts<-tang_tcts %>%  pivot_longer(
+    cols = c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48"),
+    names_to = "tctstype",
+    values_to = "tctsvalue",
+   names_repair = "unique")
+  
+
+tang_hemo <- tang_coagulation [c("hemorH0","hemorH2", "hemorH4", "hemorH6", "hemorH12", "hemorH24", "hemorH48", "hemoaH48","dcd")]
+
+
+
+tang_long_hemo<-tang_hemo %>%  pivot_longer(
+    cols = c("hemorH0","hemorH2", "hemorH4", "hemorH6", "hemorH12", "hemorH24", "hemorH48", "hemoaH48") ,
+    names_to = "hemotype",
+    values_to = "hemovalue",
+   names_repair = "unique")
+
+tang_long_hemo$hemovalue_2 <- ifelse(tang_long_hemo$hemovalue>0,1,0)  
+tang_long_tcts$tctsvalue_2 <- ifelse(tang_long_tcts$tctsvalue>0,1,0)  
+
+
+tang_hem_2 <- tang_long_hemo[which(tang_long_hemo$hemovalue_2 == 1),]%>%count(hemotype)%>% mutate(perc = round((n/ 43)*100 ))
+
+tang_tcts_2 <- tang_long_tcts[which(tang_long_tcts$tctsvalue_2 == 1),]%>%count(tctstype)%>% mutate(perc = round((n/ 43)*100))
+
+```
+
+```{r}
+head(tang_tcts_2)
+```
+
+```{r}
+table(tang_long_hemo$hemotype, tang_long_hemo$hemovalue)
+```
+
+```{r}
+### figure TCTS en fonction du temps 
+```
+
+```{r}
+tctsplot<-ggplot(data = tang_tcts_2) +  geom_bar(mapping = aes(x=tctstype, y=perc), stat = "identity",fill="#008080",width = 0.4) + scale_x_discrete(limits=c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48"), labels =c("TCTSH0"="H0","TCTSH2"="H2","TCTSH4"="H4","TCTSH6"="H6","TCTSH12"="H12","TCTSH24"="H24","TCTSH48"="H48","TCTSaH48"="H72"), name = "Heures après traitement" ) + ylab("fréquences en %") + geom_text(aes(tctstype, perc, label =paste(perc,"%")),position = position_dodge(width = 1),vjust = -0.5, size = 2 )+ ggtitle("Evolution du TCTS post-administration d'antivenin ")
+```
+
+```{r}
+ggsave("tctsplot.pdf", plot = tctsplot, height = 8, units = "cm")
+```
+
+```{r}
+
+hemplot<-ggplot(data = tang_hem_2) +  geom_bar(mapping = aes(x=hemotype, y= perc),stat ="identity",fill="#008080", width = 0.4) + scale_x_discrete(limits=c("hemorH0","hemorH2", "hemorH4", "hemorH6", "hemorH12", "hemorH24", "hemorH48", "hemoaH48"), labels =c("hemorH0"="H0","hemorH2"="H2","hemorH4"="H4","hemorH6"="H6","hemorH12"="H12","hemorH24"="H24","hemorH48"="H48","hemoaH48"="H72"), name = "Heures après traitement" ) + ylab("fréquences en %")+ geom_text(aes(hemotype, perc, label =paste(perc,"%")),position = position_dodge(width = 1),vjust = -0.5, size = 2 )+ ggtitle("Evolution des saignements post-administration d'antivenin ")
+```
+
+```{r}
+ggsave("hemplot.pdf", plot = hemplot, height = 8, units = "cm")
+```
+
+```{r}
+### modèle multi-état 
+
+
+# recovery/ 
+## relapse/
+## recovery2
+### création de la variable décès 
+
+
+unite(tang_hemo%>%filter(hemorH0>0),  col = hemorr, c(hemorH0,hemorH2, hemorH4,hemorH6, hemorH12, hemorH24, hemorH48, hemoaH48) , sep=":", remove =TRUE)
+```
+
+```{r}
+
+# recovery/ ---2
+## relapse/---3
+## recovery2---4
+## DCD---5
+### création de la variable décès 
+
+
+ tang_st<-tang_v %>% filter(hemorH0!= 0) %>% dplyr::select( daterecovery,daterelapse,daterecovery2, datedcd,recovery,relapse,recovery2,dcd)
+
+  id<- c(1:18)
+  
+  tang_st<-cbind(tang_st,id)
+  view(tang_st)
+  
+ tang_state1<-transMat(x = list(c(2,5), c(3), c(4), c(), c()), names =c("sgt", "recovery", "relapse", "recovery2", "dcd")) 
+ 
+ tang_state1
+```
+
+```{r}
+ msprepp<-msprep(data = tang_st, trans = tang_state1, time =c(NA, "daterecovery","daterelapse", "daterecovery2", "dcd"), status = c(NA, "recovery", "relapse", "recovery2", "dcd"))
+ msprepp
+```
+
+```{r}
+tang_st
+```
+
+```{r}
+events(msprepp)
+```
+
+```{r}
+c0 <- coxph(Surv(Tstart, Tstop, status) ~ strata(trans), data = msprepp, method = "breslow")
+
+msf0 <- msfit(object = c0, vartype = "greenwood", trans = tang_state1)
+msf0a <- msfit(object = c0, vartype = "aalen", trans = tang_state1)
+plot(msf0)
+```
+
+```{r}
+pt0 <- probtrans(msf0, predt = 0, method = "greenwood")
+pt0a <- probtrans(msf0a, predt = 0, method = "aalen")
+ summary(pt0, from = 1)
+ 
+ pt70 <- probtrans(msf0a, predt = 70, method = "aalen")
+ plot(pt70)
+ 
+```
+
+```{r}
+##### fréquences de réadministration
+tang_coagulation$TCTSH0<- as.factor(tang_coagulation$TCTSH0)
+tang_coagulation$readministration<- as.factor(tang_coagulation$readministration)
+
+```
+
+```{r}
+tang_coagulation %>% ggplot(aes(x = TCTSH0, fill= readministration)) + geom_bar(position = "fill")+scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+
+
+
+```
+
+```{r}
+### tcts par heures sur les 43 patients 
+
+
+
+
+
+```
