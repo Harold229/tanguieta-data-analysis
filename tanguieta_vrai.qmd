@@ -257,18 +257,12 @@ modify_header(label = "**Variables**") %>% bold_labels() %>% as_flex_table()
 table
 ```
 
-notre
-
 ```{r}
 tang_vrai %>% filter(hemorH48 == 3) %>% dplyr::select(TCTSH48)
 ```
 
 ```{r}
 save_as_docx(table, path = "table.docx")
-```
-
-```{r}
-
 ```
 
 ## Description des TCTS et Hemorragie
@@ -283,7 +277,9 @@ tang_coagulation
 
 ```{r}
 
-tang_tcts<- tang_coagulation [c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48","dcd")]
+##tang_tcts<- tang_coagulation [c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48","dcd")]
+
+tang_tcts<- tang_v [c("TCTSH0", "TCTSH2", "TCTSH4", "TCTSH6", "TCTSH12", "TCTSH24", "TCTSH48", "TCTSaH48","dcd")]
 
 
 tang_long_tcts<-tang_tcts %>%  pivot_longer(
